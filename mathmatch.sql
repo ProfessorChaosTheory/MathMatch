@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 07, 2026 at 05:46 PM
+-- Generation Time: Mar 14, 2026 at 02:56 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -28,7 +28,8 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `classes` (
-  `class_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `classID` int(11) NOT NULL,
+  `class_name` varchar(80) NOT NULL,
   `description` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -39,8 +40,13 @@ CREATE TABLE `classes` (
 --
 
 CREATE TABLE `session` (
-  `session_id` int(100) UNSIGNED NOT NULL,
-  `date` date NOT NULL
+  `session_ID` int(100) UNSIGNED NOT NULL,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `ClassID` int(11) NOT NULL,
+  `TutorID` int(11) NOT NULL,
+  `StudentID` int(11) NOT NULL,
+  `is_scheduled` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -50,8 +56,16 @@ CREATE TABLE `session` (
 --
 
 CREATE TABLE `users` (
-  `username` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `usertype` int(1) UNSIGNED NOT NULL
+  `userID` int(100) NOT NULL,
+  `usertype` int(10) UNSIGNED NOT NULL,
+  `username` varchar(40) NOT NULL,
+  `password` varchar(40) NOT NULL,
+  `security_question` varchar(120) NOT NULL,
+  `security_answer` varchar(120) NOT NULL,
+  `is_tutor` tinyint(1) NOT NULL,
+  `TT1_ID` int(100) UNSIGNED NOT NULL,
+  `TT2_ID` int(100) UNSIGNED NOT NULL,
+  `TT3_ID` int(100) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -62,29 +76,67 @@ CREATE TABLE `users` (
 -- Indexes for table `classes`
 --
 ALTER TABLE `classes`
-  ADD PRIMARY KEY (`class_name`);
+  ADD PRIMARY KEY (`classID`);
 
 --
 -- Indexes for table `session`
 --
 ALTER TABLE `session`
-  ADD PRIMARY KEY (`session_id`);
+  ADD PRIMARY KEY (`session_ID`),
+  ADD KEY `ClassID` (`ClassID`),
+  ADD KEY `TutorID` (`TutorID`),
+  ADD KEY `StudentID` (`StudentID`);
 
 --
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`username`);
+  ADD PRIMARY KEY (`userID`),
+  ADD KEY `TT1_ID` (`TT1_ID`),
+  ADD KEY `TT2_ID` (`TT2_ID`),
+  ADD KEY `TT3_ID` (`TT3_ID`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
+-- AUTO_INCREMENT for table `classes`
+--
+ALTER TABLE `classes`
+  MODIFY `classID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `session`
 --
 ALTER TABLE `session`
-  MODIFY `session_id` int(100) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `session_ID` int(100) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `userID` int(100) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `session`
+--
+ALTER TABLE `session`
+  ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`ClassID`) REFERENCES `classes` (`classID`),
+  ADD CONSTRAINT `session_ibfk_2` FOREIGN KEY (`TutorID`) REFERENCES `users` (`userID`),
+  ADD CONSTRAINT `session_ibfk_3` FOREIGN KEY (`StudentID`) REFERENCES `users` (`userID`);
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`TT1_ID`) REFERENCES `session` (`session_ID`),
+  ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`TT2_ID`) REFERENCES `session` (`session_ID`),
+  ADD CONSTRAINT `users_ibfk_3` FOREIGN KEY (`TT3_ID`) REFERENCES `session` (`session_ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
