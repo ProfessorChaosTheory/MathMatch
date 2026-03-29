@@ -1,0 +1,43 @@
+.boxed {
+  outline-style: groove;
+  outline-color: red;
+}
+
+.evansFunction{
+     color: white;
+     font-size: 20px;
+     background-color: black;
+     margin: 50px;
+     border: blue;
+     border: 5px;
+     padding: 20px;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.sorry{
+    color: red;
+    text-align: center;
+    font-size: 100px;
+    background-color: black;
+    border: white;
+}
+
+label {
+  display: block; 
+  font-weight: bold;
+}
+input[type=text], [type=password] {
+  display: block; 
+}
+input[type=checkbox], [type=radio] {
+  width: 10px;
+}
+select {
+  display: block;
+}
