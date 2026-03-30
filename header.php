@@ -27,7 +27,7 @@
     </div>
         
     <div class="w3-container w3-blue w3-cell">
-        <button id="openNav" class="w3-button w3-blue w3-hover-black w3-hover-text-white w3-left" onclick="w3_open()"><h1>MathMatch <?php "\n" ?> Services</button>
+        <button id="openNav" class="w3-button w3-blue w3-hover-black w3-hover-text-white w3-left" onclick="w3_open()"><h1>MathMatch <?php "\n" ?> </button>
     </div>
         
     <div class="w3-container w3-blue w3-cell"> 

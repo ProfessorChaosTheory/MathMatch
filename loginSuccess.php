@@ -7,49 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
     <?php include 'header.php' ?>
+    <?php include 'chalkboard-bg.php'; ?>
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --chalk-white: #f0ece0;
-            --chalk-dim:   #b8b09a;
-            --chalk-faint: #6b6457;
-            --board-dark:  #1a2a20;
-            --board-edge:  #162218;
-            --accent-gold: #c9a84c;
-            --accent-green:#5a9e6f;
-        }
-
-        html, body {
-            height: 100%;
-            font-family: 'Crimson Pro', Georgia, serif;
-            background-color: var(--board-dark);
-            color: var(--chalk-white);
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg, transparent, transparent 28px,
-                    rgba(255,255,255,0.018) 28px,
-                    rgba(255,255,255,0.018) 29px
-                );
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .page {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-            padding: 2rem;
-        }
 
         .card {
             width: 100%;
@@ -134,7 +93,7 @@
 <div class="page">
     <div class="card">
         <div class="icon"><i class="fa-solid fa-circle-check"></i></div>
-        <h1>Welcome to <strong>MathMatch</strong></h1>
+        <h1><strong>Welcome to MathMatch</strong></h1>
         <p>You have successfully signed in.</p>
         <a href="index.php" class="btn">
             <i class="fa-solid fa-house"></i>&ensp;Go to Dashboard

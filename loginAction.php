@@ -53,7 +53,7 @@ try {
 // ── 4. Look up the user by username ─────────────────────────
 // We use a prepared statement to prevent SQL injection.
 $stmt = $pdo->prepare(
-    'SELECT userID, username, user_email, password, usertype, is_tutor, hash
+    'SELECT userID, username, user_email, password, usertype, is_tutor
      FROM users
      WHERE username = :username
      LIMIT 1'
@@ -64,7 +64,7 @@ $user = $stmt->fetch();
 // ── 5. Verify password ──────────────────────────────────────
 // password_verify() checks the submitted password against the
 // bcrypt hash stored by password_hash() at registration time.
-if (!$user || !password_verify($password, $user['hash'])) {
+if (!$user || !password_verify($password, $user['password'])) {
     header('Location: loginFailure.php');
     exit;
 }
