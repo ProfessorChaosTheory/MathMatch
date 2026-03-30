@@ -19,14 +19,13 @@ if ($_GET['pswd'] !== $_GET['pswd2']) {
 $usertype = 1;
 $uname = $_GET["uname"];
 $email = $_GET["email"];
-$pswd = $_GET["pswd"];
+$pswd = password_hash($_GET["pswd"], PASSWORD_DEFAULT);
 $question = $_GET["question"];
 $answer = $_GET["answer"];
 $is_tutor = NULL;
 $TT_1 = NULL;
 $TT_2 = NULL;
 $TT_3 = NULL;
-$hash = password_hash($pswd, PASSWORD_DEFAULT);
 
 $sql = "insert into users values (0, '". $usertype . "', '" . $uname . "', '" . 
   $email . "', '" . $pswd . "', '" . $question . "', '" . 
