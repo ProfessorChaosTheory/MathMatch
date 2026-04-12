@@ -1,9 +1,8 @@
 <?php
-// ============================================================
+
 //  loginAction.php
 //  Handles POST from login.php, validates credentials against
 //  the mathmatch database, and redirects accordingly.
-// ============================================================
 
 session_start();
 
@@ -24,8 +23,6 @@ if ($username === '' || $password === '') {
 }
 
 // ── 3. Database connection ───────────────────────────────────
-// Adjust host / dbname / user / pass to match your XAMPP setup.
-// By default XAMPP uses root with no password.
 $host   = 'localhost';
 $dbname = 'mathmatch';
 $dbuser = 'root';
@@ -81,6 +78,6 @@ $_SESSION['usertype']  = $user['usertype'];
 $_SESSION['is_tutor']  = $user['is_tutor'];
 
 // ── 7. Redirect to success page ─────────────────────────────
-header('Location: loginSuccess.php');
+header('Location: dashboard.php');
 exit;
 ?>
