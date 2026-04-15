@@ -1,9 +1,8 @@
 <?php
-// ============================================================
+
 //  loginAction.php
 //  Handles POST from login.php, validates credentials against
 //  the mathmatch database, and redirects accordingly.
-// ============================================================
 
 session_start();
 
@@ -24,8 +23,6 @@ if ($username === '' || $password === '') {
 }
 
 // ── 3. Database connection ───────────────────────────────────
-// Adjust host / dbname / user / pass to match your XAMPP setup.
-// By default XAMPP uses root with no password.
 $host   = 'localhost';
 $dbname = 'mathmatch';
 $dbuser = 'root';
@@ -61,6 +58,21 @@ $stmt = $pdo->prepare(
 $stmt->execute([':username' => $username]);
 $user = $stmt->fetch();
 
+// IF Statement for admins
+if ($user['usertype'] == 1) {
+    session_regenerate_id(true);
+
+    $_SESSION['loggedin']  = true;
+    $_SESSION['userID']    = $user['userID'];
+    $_SESSION['username']  = $user['username'];
+    $_SESSION['user_email'] = $user['user_email'];
+    $_SESSION['usertype']  = $user['usertype'];
+    $_SESSION['is_tutor']  = $user['is_tutor'];
+
+    header('Location: loginSuccess.php');
+    exit;
+}
+
 // ── 5. Verify password ──────────────────────────────────────
 // password_verify() checks the submitted password against the
 // bcrypt hash stored by password_hash() at registration time.
@@ -81,6 +93,6 @@ $_SESSION['usertype']  = $user['usertype'];
 $_SESSION['is_tutor']  = $user['is_tutor'];
 
 // ── 7. Redirect to success page ─────────────────────────────
-header('Location: loginSuccess.php');
+header('Location: dashboard.php');
 exit;
 ?>

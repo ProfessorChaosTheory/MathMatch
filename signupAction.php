@@ -79,7 +79,7 @@ $hashed = password_hash($pswd, PASSWORD_DEFAULT);
 // is_tutor, TT1_ID, TT2_ID, TT3_ID all have DB defaults (0 / NULL) — omit them
 $stmt = $pdo->prepare(
     'INSERT INTO users (usertype, username, user_email, password, security_question, security_answer)
-     VALUES (1, :uname, :email, :pswd, :question, :answer)'
+     VALUES (3, :uname, :email, :pswd, :question, :answer)'
 );
 
 try {
