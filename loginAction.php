@@ -58,6 +58,21 @@ $stmt = $pdo->prepare(
 $stmt->execute([':username' => $username]);
 $user = $stmt->fetch();
 
+// IF Statement for admins
+if ($user['usertype'] == 1) {
+    session_regenerate_id(true);
+
+    $_SESSION['loggedin']  = true;
+    $_SESSION['userID']    = $user['userID'];
+    $_SESSION['username']  = $user['username'];
+    $_SESSION['user_email'] = $user['user_email'];
+    $_SESSION['usertype']  = $user['usertype'];
+    $_SESSION['is_tutor']  = $user['is_tutor'];
+
+    header('Location: loginSuccess.php');
+    exit;
+}
+
 // ── 5. Verify password ──────────────────────────────────────
 // password_verify() checks the submitted password against the
 // bcrypt hash stored by password_hash() at registration time.

@@ -1,3 +1,10 @@
+<?php
+require 'DBConnect.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,19 +22,30 @@
   <a href="sorry.php" class="w3-bar-item w3-button">Question Board</a>
   <a href="sorry.php" class="w3-bar-item w3-button">Class Tutoring Calendar</a>
   <a href="sorry.php" class="w3-bar-item w3-button">Miscellaneous</a>
+  <?php if (isset($_SESSION['username']) && ($_SESSION['usertype']) == 1): ?>
+    <div class="dropdown">
+        <button class="drop-btn w3-button">Admin Tools <i class="fa fa-caret-down"></i></button>      
+        <div class="dropdown-content">
+            <a href="registerClass.php" class="w3-bar-item w3-button">Class Registration</a>
+        </div>
+    </div>
+  <?php endif; ?>
 </div>
 
 <div id="main">
     <div class="w3-cell-row" style="width:100%">
-
     <div class="w3-container w3-blue w3-cell">
-        <a href="index.php" class="w3-bar-item w3-button w3-hover-black w3-text-black w3-hover-text-white"><h2>Home</h2></a>
+        <a href="welcomeAdmin.php" class="w3-bar-item w3-button w3-hover-black w3-text-black w3-hover-text-white"><h2>Home</h2></a>
         <a href="sorry.php" class="w3-bar-item w3-button w3-hover-black w3-text-black w3-hover-text-white"><h2>About</h2></a>
         <a href="sorry.php" class="w3-bar-item w3-button w3-hover-black w3-text-black w3-hover-text-white"><h2>Contact</h2></a>
     </div>
         
-    <div class="w3-container w3-blue w3-cell">
+    <div class="w3-container w3-blue w3-cell w3-center">
         <button id="openNav" class="w3-button w3-blue w3-hover-black w3-hover-text-white w3-left" onclick="w3_open()"><h1>MathMatch <?php "\n" ?> </button>
+        <?php if (isset($_SESSION['username']) && ($_SESSION['usertype']) == 1): ?>
+            <br>
+            <h3>Welcome, <?php echo $_SESSION['username'] ?></h3>
+        <?php endif; ?>
     </div>
         
     <div class="w3-container w3-blue w3-cell"> 

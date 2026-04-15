@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 
+<?php $_SESSION = [] ?>
+
 <html>
     <head>
         <title>MathMatch</title>
