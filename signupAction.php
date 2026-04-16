@@ -75,7 +75,7 @@ if ($check->fetch()) {
 // ── Hash password and insert ─────────────────────────────────
 $hashed = password_hash($pswd, PASSWORD_DEFAULT);
 
-// usertype = 1 (student by default)
+// usertype = 3 (student by default)
 // is_tutor, TT1_ID, TT2_ID, TT3_ID all have DB defaults (0 / NULL) — omit them
 $stmt = $pdo->prepare(
     'INSERT INTO users (usertype, username, user_email, password, security_question, security_answer)
