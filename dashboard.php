@@ -42,6 +42,68 @@ try {
     die('Database connection failed.');
 }
 
+// ── Passive cleanup — purge past sessions and blocks ─────────
+include 'cleanup.php';
+
+// ── Load this user's upcoming scheduled sessions (as student) ──
+// Query directly rather than via TT slots so results are chronological
+$upcomingStmt = $pdo->prepare(
+    'SELECT s.session_ID, s.date, s.time, s.ClassID,
+            c.class_name,
+            u.username AS tutor_name,
+            s.TutorID
+     FROM session s
+     JOIN users u ON u.userID = s.TutorID
+     LEFT JOIN classes c ON c.classID = s.ClassID
+     WHERE s.StudentID = :uid
+       AND s.is_scheduled = 1
+       AND s.date >= :today
+     ORDER BY s.date ASC, s.time ASC
+     LIMIT 3'
+);
+$upcomingStmt->execute([':uid' => $userID, ':today' => date('Y-m-d')]);
+$upcomingSessions = $upcomingStmt->fetchAll();
+
+// ── Load tutor's upcoming sessions (as tutor, up to 6) ───────
+$tutorSessionsStmt = null;
+$tutorSessions     = [];
+if ($usertype === 2 || $usertype === 1) {
+    $tutorSessionsStmt = $pdo->prepare(
+        'SELECT s.session_ID, s.date, s.time, s.ClassID,
+                c.class_name,
+                u.username AS student_name,
+                s.StudentID
+         FROM session s
+         JOIN users u ON u.userID = s.StudentID
+         LEFT JOIN classes c ON c.classID = s.ClassID
+         WHERE s.TutorID = :uid
+           AND s.is_scheduled = 1
+           AND s.date >= :today
+         ORDER BY s.date ASC, s.time ASC
+         LIMIT 6'
+    );
+    $tutorSessionsStmt->execute([':uid' => $userID, ':today' => date('Y-m-d')]);
+    $tutorSessions = $tutorSessionsStmt->fetchAll();
+}
+
+// ── Unread notifications ──────────────────────────────────────
+$notifStmt = $pdo->prepare(
+    'SELECT notification_ID, message, created_at
+     FROM notifications
+     WHERE userID = :uid AND is_read = 0
+     ORDER BY created_at DESC'
+);
+$notifStmt->execute([':uid' => $userID]);
+$notifications = $notifStmt->fetchAll();
+
+// Mark them read now that they've been loaded
+if (!empty($notifications)) {
+    $markRead = $pdo->prepare(
+        'UPDATE notifications SET is_read = 1 WHERE userID = :uid AND is_read = 0'
+    );
+    $markRead->execute([':uid' => $userID]);
+}
+
 // ── Load this user's questions ───────────────────────────────
 $qStmt = $pdo->prepare(
     'SELECT questions_asked_ID, question
@@ -165,36 +227,125 @@ $roleLabel  = $roleLabels[$usertype] ?? 'User';
         </div>
     <?php endif; ?>
 
-    <!-- ── Scheduling placeholder ──────────────────────────── -->
-    <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between">
-            <span>Scheduling</span>
-            <span class="text-muted small">Coming next sprint</span>
+    <!-- ── Notifications ────────────────────────────────────── -->
+    <?php if (!empty($notifications)): ?>
+    <div class="card mb-3 border-warning">
+        <div class="card-header bg-warning text-dark">
+            Notifications
         </div>
-        <div class="card-body text-muted fst-italic">
-            Scheduling interface will be built here.
+        <ul class="list-group list-group-flush">
+            <?php foreach ($notifications as $n): ?>
+            <li class="list-group-item">
+                <small class="text-muted">
+                    <?php echo date('M j g:i A', strtotime($n['created_at'])); ?>
+                </small><br>
+                <?php echo htmlspecialchars($n['message']); ?>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+
+    <!-- ── Scheduling actions ───────────────────────────────── -->
+    <div class="card mb-3">
+        <div class="card-header">Scheduling</div>
+        <div class="card-body d-flex gap-2 flex-wrap">
+            <?php if ($usertype === 2): ?>
+                <a href="offerSession.php" class="btn btn-primary">
+                    Offer Tutoring
+                </a>
+            <?php endif; ?>
+            <?php if ($usertype === 2 || $usertype === 3): ?>
+                <a href="scheduleSession.php" class="btn btn-outline-primary">
+                    Schedule Tutoring
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 
-    <!-- ── Upcoming sessions ────────────────────────────────── -->
+    <!-- ── Upcoming sessions (as student) ──────────────────── -->
     <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between">
-            <span>Upcoming Sessions</span>
-            <span class="text-muted small">Coming next sprint</span>
-        </div>
+        <div class="card-header">Upcoming Sessions</div>
         <div class="card-body">
+            <?php if (empty($upcomingSessions)): ?>
+                <p class="text-muted fst-italic mb-0">No upcoming sessions scheduled.</p>
+            <?php else: ?>
             <div class="row g-3">
-                <?php for ($i = 1; $i <= 3; $i++): ?>
+                <?php foreach ($upcomingSessions as $s): ?>
                 <div class="col-md-4">
-                    <div class="session-slot">
-                        <div class="small mb-1">Session <?php echo $i; ?></div>
-                        <em>Not scheduled</em>
+                    <div class="border rounded p-3">
+                        <div class="fw-bold mb-1">
+                            <?php echo date('M j, Y', strtotime($s['date'])); ?>
+                            &mdash;
+                            <?php echo date('g:i A', strtotime($s['time'])); ?>
+                        </div>
+                        <div class="small text-muted mb-1">
+                            Tutor: <?php echo htmlspecialchars($s['tutor_name']); ?>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            <?php echo $s['class_name']
+                                ? htmlspecialchars($s['class_name'])
+                                : '<em>Class unspecified</em>'; ?>
+                        </div>
+                        <form action="dashboardAction.php" method="POST"
+                              onsubmit="return confirm('Cancel this session?')"
+                              class="d-inline">
+                            <input type="hidden" name="action"     value="cancel_session">
+                            <input type="hidden" name="session_id" value="<?php echo (int)$s['session_ID']; ?>">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Cancel Session
+                            </button>
+                        </form>
                     </div>
                 </div>
-                <?php endfor; ?>
+                <?php endforeach; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
+
+    <!-- ── Tutor: upcoming appointments ─────────────────────── -->
+    <?php if ($usertype === 2 || $usertype === 1): ?>
+    <div class="card mb-4">
+        <div class="card-header">My Upcoming Tutoring Appointments</div>
+        <div class="card-body">
+            <?php if (empty($tutorSessions)): ?>
+                <p class="text-muted fst-italic mb-0">No upcoming tutoring appointments.</p>
+            <?php else: ?>
+            <div class="row g-3">
+                <?php foreach ($tutorSessions as $s): ?>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="fw-bold mb-1">
+                            <?php echo date('M j, Y', strtotime($s['date'])); ?>
+                            &mdash;
+                            <?php echo date('g:i A', strtotime($s['time'])); ?>
+                        </div>
+                        <div class="small text-muted mb-1">
+                            Student: <?php echo htmlspecialchars($s['student_name']); ?>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            <?php echo $s['class_name']
+                                ? htmlspecialchars($s['class_name'])
+                                : '<em>Class unspecified</em>'; ?>
+                        </div>
+                        <form action="dashboardAction.php" method="POST"
+                              onsubmit="return confirm('Cancel this appointment? The student will be notified.')"
+                              class="d-inline">
+                            <input type="hidden" name="action"     value="cancel_tutor_session">
+                            <input type="hidden" name="session_id" value="<?php echo (int)$s['session_ID']; ?>">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- ── Ask a question ───────────────────────────────────── -->
     <div class="card mb-4">

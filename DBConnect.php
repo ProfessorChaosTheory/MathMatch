@@ -2,17 +2,17 @@
 
 //connection string
 $servername = "localhost";
-$username = "mathmatch";
-$password = "mathmatch";
+$dbuser = "mathmatch";
+$dbpassword = "mathmatch";
 $dbname = "mathmatch";
 $conn;
 
 // Internal APIs 
 function openDB() {
-  global $servername, $username, $password, $dbname, $conn;
+  global $servername, $dbuser, $dbpassword, $dbname, $conn;
 
 // Create connection
-  $conn = new mysqli($servername, $username, $password, $dbname);
+  $conn = new mysqli($servername, $dbuser, $dbpassword, $dbname);
   if ($conn->connect_error)
     return $conn->connect_error;
   else

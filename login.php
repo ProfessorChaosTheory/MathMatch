@@ -8,9 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
     <?php include 'header.php' ?>
+</head>
+
+<body>
     <?php include 'chalkboard-bg.php'; ?>
     <style>
         /* ── Card ── */
+        .page {
+            flex: none;
+            min-height: 70vh;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .card {
             width: 100%;
             max-width: 560px;
@@ -228,9 +240,7 @@
             border-color: var(--accent-gold);
         }
     </style>
-</head>
-<body>
-<?php if (!empty($_SESSION['signup_success'])): ?>
+    <?php if (!empty($_SESSION['signup_success'])): ?>
     <div style="
         max-width: 560px;
         margin: 1rem auto 0;

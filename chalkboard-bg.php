@@ -1,23 +1,15 @@
 <?php
-/*
- * chalkboard-bg.php
- * ─────────────────────────────────────────────────────────────
- * Drop-in animated chalkboard background for MathMatch pages.
+
+/* chalkboard-bg.php
+ *  * Drop-in animated chalkboard background for MathMatch pages.
  *
  * Usage — place this ONCE inside the page <head>:
  *   <?php include 'chalkboard-bg.php'; ?>
  *
  * Then add <div id="mathBg" class="math-bg"></div>
- * as the FIRST child of <body>.  The JS at the bottom of this
- * file will populate it automatically.
- *
- * The file emits:
- *   • CSS custom-property palette        (:root)
- *   • Base html/body reset               (font, color, height)
- *   • Chalkboard texture pseudo-element  (body::before)
- *   • Floating-symbol layer              (.math-bg / .math-bg span)
- *   • <div id="mathBg"> injection script (runs after DOM ready)
- * ─────────────────────────────────────────────────────────────
+ * as the FIRST child of <body>.
+
+
  */
 ?>
 <style>
@@ -48,10 +40,10 @@ body {
     background-color: var(--board-dark);
     color: var(--chalk-white);
     overflow-x: hidden;
-    /* flex column so header/footer sit naturally above/below .page */
-    display: flex;
-    flex-direction: column;
+    padding-top: 40px;
+    padding-bottom: 180px;
 }
+
 
 /* ── Global page centering ───────────────────────────────── */
 /* .page grows to fill whatever vertical space remains after
@@ -59,7 +51,6 @@ body {
 .page {
     position: relative;
     z-index: 1;          /* above the background layers (z-index: -1) */
-    flex: 1;             /* fills remaining body height between nav & footer */
     display: flex;
     align-items: center;
     justify-content: center;
