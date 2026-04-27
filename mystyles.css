@@ -1,3 +1,4 @@
+<<<<<<< main
 .boxed {
   outline-style: groove;
   outline-color: red;
@@ -119,3 +120,88 @@ footer {
     box-shadow: 0 3px 14px rgba(0,0,0,0.4);
     color: #212529;
 }
+=======
+.boxed {
+  outline-style: groove;
+  outline-color: red;
+}
+
+.evansFunction{
+     color: white;
+     font-size: 20px;
+     background-color: black;
+     margin: 50px;
+     border: blue;
+     border: 5px;
+     padding: 20px;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.dropbtn {
+  background-color: #f9f9f9;
+  color: black;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 200px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: #3e8e41;
+}
+
+.sorry{
+    color: red;
+    text-align: center;
+    font-size: 100px;
+    background-color: black;
+    border: white;
+}
+
+label {
+  display: block; 
+  font-weight: bold;
+}
+input[type=text], [type=password] {
+  display: block; 
+}
+input[type=checkbox], [type=radio] {
+  width: 10px;
+}
+select {
+  display: block;
+}
+>>>>>>> Evan
