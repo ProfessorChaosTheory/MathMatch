@@ -1,4 +1,4 @@
-<div class="w3-container w3-bar w3-bottom w3-blue w3-margin-top">
+<div class="w3-container w3-bar w3-blue w3-margin-top">
   <div class="w3-container w3-quarter">
     <p>Support</p>
     <p>E-Mail</p>

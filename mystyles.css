@@ -81,3 +81,41 @@ input[type=checkbox], [type=radio] {
 select {
   display: block;
 }
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+#main, .w3-top {
+    position: relative;
+    z-index: 1000;
+}
+
+footer {
+    position: relative;
+    padding: 20px;
+}
+
+/* ── Full-width content area ── */
+.dash-wrap {
+    width: 100%;
+    padding: 1.5rem 2rem 3rem;
+}
+
+/* ── Page title on the chalkboard ── */
+.dash-title { color: #f0ece0; margin-bottom: 1.5rem; }
+.dash-title h2 { font-size: 2rem; font-weight: 700; }
+.dash-title p  { font-size: 1rem; opacity: 0.75; margin: 0; }
+
+/* ── White cards with dark text ── */
+.card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+    color: #212529;
+}
