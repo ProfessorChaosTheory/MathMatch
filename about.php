@@ -1,11 +1,7 @@
-<html>
-    <head class="w3-section">
-        <title>What is MathMatch?</title>
-        <?php include 'header.php' ?>
-    </head>
-    <body>
+<?php $pageTitle = 'About'; ?>
+<?php include 'header.php'; ?>
         <?php include 'chalkboard-bg.php'; ?>
-        <div class="w3-section w3-margin-top w3-padding-48">
+        <div class="page" style="align-items: flex-start; padding-top: 5rem;">
             <button onClick="myFunction('about1')" class="w3-btn w3-block w3-left-align">What is MathMatch?
             </button>
             <div id="about1" class="w3-container w3-animate-left w3-hide">MathMatch is a new way to study for your classes,
@@ -49,9 +45,8 @@
                 </p>
             </div>
         </div>
-        <footer class="w3-section">
-          <?php include 'footer.php' ?>
-        </footer>
+        <?php include 'footer.php' ?>
+        </div>
 
 
         <script>
@@ -67,6 +62,4 @@
                 }
             }
         </script>
-    </body>
-</html>
 

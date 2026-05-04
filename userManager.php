@@ -1,6 +1,5 @@
 <?php
 session_start();
-require 'DBConnect.php';
 
 // Admin check
 if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 1) {

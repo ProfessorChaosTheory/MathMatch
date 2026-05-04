@@ -1,7 +1,6 @@
 <html>
   <head>
-    <title>SORRY</title>
-  <br>
+      <title>SORRY</title> <!-- Confirmation -->
   <?php include 'header.php' ?>
 </head>
 <body>

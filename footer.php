@@ -1,28 +1,26 @@
-<div class="w3-container w3-bar w3-blue w3-margin-top">
-  <div class="w3-container w3-quarter">
-    <p>Support</p>
-    <p>E-Mail</p>
-    <p>Chat</p>
-    <p>Hotline</p>
+<div style="width:100%; background:#000; display:flex; padding: 1.5rem 2rem; box-sizing:border-box;">
+  <div style="flex:1; padding: 0 1rem;">
+    <p style="color:#fff; font-weight:bold;">Support</p>
+    <p style="color:#aaa;"><a href="mailto:admin@mathmatch.com"> E-Mail </a></p>
+    <p style="color:#aaa;">Chat</p>
+    <p style="color:#aaa;">Hotline</p>
   </div>
-    <div class="w3-container w3-quarter">
-    <p>Follow Us!</p>
-    <a href="https://www.facebook.com/PritchardsProfessionalParachutePackingandRigging/">Facebook</a>
-    <a href="https://jointheteem.com/videos/swooping-videos/skydive-swoop-crash-compilation-flcpa/">Join the Teem</a>
-    <a href="https://www.reddit.com/r/SkyDiving/comments/fci5cp/how_to_care_for_your_rig/?captcha=1">Reddit</a>
+  <div style="flex:1; padding: 0 1rem;">
+    <p style="color:#fff; font-weight:bold;">Follow Us!</p>
+    <p style="color:#aaa; font-weight:bold;">Facebook</p>
+    <p style="color:#aaa; font-weight:bold;">Bluesky</p>
+    <p style="color:#aaa; font-weight:bold;">Twitter/X</p>
   </div>
-    <div class="w3-container w3-quarter">
-    <p>Resources</p>
-    <p>Terms of Service</p>
-    <p>Privacy Policy</p>
-    <p>Cookies</p>
+  <div style="flex:1; padding: 0 1rem;">
+    <p style="color:#fff; font-weight:bold;">Resources</p>
+    <p style="color:#aaa;">Terms of Service</p>
+    <p style="color:#aaa;">Privacy Policy</p>
+    <p style="color:#aaa;">Cookies</p>
   </div>
-    <div class="w3-container w3-quarter">
-    <p>MathMatch</p>
-    <p>160 Pearl Street</p>
-    <p>Fitchburg, MA 01420</p>
-    <p>(570)-977-6169</p>
+  <div style="flex:1; padding: 0 1rem;">
+    <p style="color:#fff; font-weight:bold;">MathMatch</p>
+    <p style="color:#aaa;">160 Pearl Street</p>
+    <p style="color:#aaa;">Fitchburg, MA 01420</p>
+    <p style="color:#aaa;">(570)-977-6169</p>
   </div>
-
-    </div>
-</div> 
+</div>
