@@ -9,14 +9,11 @@
 
 session_start();
 
-if (empty($_SESSION['loggedin'])) {
-    header('Location: login.php');
-    exit;
-}
-
-$userID   = (int)$_SESSION['userID'];
-$usertype = (int)$_SESSION['usertype'];
-$username = htmlspecialchars($_SESSION['username']);
+// Public page — guests can view but not post
+$loggedIn = !empty($_SESSION['loggedin']);
+$userID   = $loggedIn ? (int)$_SESSION['userID']   : 0;
+$usertype = $loggedIn ? (int)$_SESSION['usertype']  : 0;
+$username = $loggedIn ? htmlspecialchars($_SESSION['username']) : '';
 
 // ── DB connection ────────────────────────────────────────────
 $host   = 'localhost';
@@ -129,7 +126,11 @@ unset($_SESSION['board_flash']);
 
     <div class="board-title">
         <h2>Q&amp;A Board</h2>
-        <p>Logged in as: <strong><?php echo $username; ?></strong></p>
+        <?php if ($loggedIn): ?>
+            <p>Logged in as: <strong><?php echo $username; ?></strong></p>
+        <?php else: ?>
+            <p><a href="login.php" style="color:var(--accent-gold);">Sign in</a> to ask questions or post answers.</p>
+        <?php endif; ?>
     </div>
     <hr style="border-color: rgba(240,236,224,0.2); margin-bottom:1.5rem;">
 
@@ -140,6 +141,7 @@ unset($_SESSION['board_flash']);
     <?php endif; ?>
 
     <!-- ── Ask a question ───────────────────────────────────── -->
+    <?php if ($loggedIn): ?>
     <div class="card mb-4">
         <div class="card-header">Ask a Question</div>
         <div class="card-body">
@@ -153,6 +155,13 @@ unset($_SESSION['board_flash']);
             </form>
         </div>
     </div>
+    <?php else: ?>
+    <div class="card mb-4">
+        <div class="card-body text-muted fst-italic">
+            <a href="login.php">Sign in</a> to ask a question.
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- ── Question threads ──────────────────────────────────── -->
     <?php if (empty($board)): ?>

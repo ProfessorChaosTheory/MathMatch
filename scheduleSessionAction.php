@@ -15,8 +15,8 @@ $userID   = (int)$_SESSION['userID'];
 $usertype = (int)$_SESSION['usertype'];
 $username = $_SESSION['username'];
 
-if ($usertype !== 2 && $usertype !== 3) {
-    $_SESSION['schedule_flash'] = 'error: Only students and tutors can book sessions.';
+if ($usertype !== 1 && $usertype !== 2 && $usertype !== 3) {
+    $_SESSION['schedule_flash'] = 'error: You must be logged in to perform this action.';
     header('Location: scheduleSession.php');
     exit;
 }
@@ -165,6 +165,101 @@ switch ($action) {
         $_SESSION['schedule_flash'] = "Session booked for $dateStr at $timeStr.";
         header('Location: dashboard.php');
         exit;
+        
+        case 'remove_slot':
+    if ($usertype !== 1) {
+        $_SESSION['schedule_flash'] = 'error: Only admins can remove slots.';
+        header('Location: scheduleSession.php');
+        exit;
+    }
+
+    $blockID  = (int)($_POST['block_id']     ?? 0);
+    $tutorID  = (int)($_POST['tutor_id']     ?? 0);
+    $date     =       $_POST['date']         ?? '';
+    $time     =       $_POST['time']         ?? '';
+    $slotMins = (int)($_POST['slot_minutes'] ?? 0);
+
+    if ($blockID === 0 || $date === '' || $time === '') {
+        $_SESSION['schedule_flash'] = 'error: Invalid request.';
+        header('Location: scheduleSession.php');
+        exit;
+    }
+
+    // Confirm slot isn't already booked
+    $chk = $pdo->prepare(
+        'SELECT session_ID FROM session
+         WHERE TutorID = :tid AND date = :date
+           AND time = :time AND is_scheduled = 1'
+    );
+    $chk->execute([':tid' => $tutorID, ':date' => $date, ':time' => $time]);
+    if ($chk->fetch()) {
+        $_SESSION['schedule_flash'] = 'error: That slot is already booked and cannot be removed here. Cancel the booking first.';
+        header('Location: scheduleSession.php');
+        exit;
+    }
+
+    // Fetch the block
+    $blk = $pdo->prepare(
+        'SELECT start_time, end_time, slot_minutes, ClassID
+         FROM availability_blocks WHERE block_ID = :bid AND TutorID = :tid'
+    );
+    $blk->execute([':bid' => $blockID, ':tid' => $tutorID]);
+    $block = $blk->fetch();
+
+    if (!$block) {
+        $_SESSION['schedule_flash'] = 'error: Block not found.';
+        header('Location: scheduleSession.php');
+        exit;
+    }
+
+    // Build full slot list, remove the target, rebuild contiguous blocks
+    $blockStart = strtotime($block['start_time']);
+    $blockEnd   = strtotime($block['end_time']);
+    $stepSecs   = $slotMins * 60;
+    $allSlots   = [];
+    for ($t = $blockStart; $t + $stepSecs <= $blockEnd; $t += $stepSecs) {
+        $allSlots[] = date('H:i:s', $t);
+    }
+
+    $kept = array_values(array_filter($allSlots, fn($s) => $s !== $time));
+
+    $newBlocks = [];
+    if (!empty($kept)) {
+        $runStart = $kept[0];
+        $prev     = strtotime($kept[0]);
+        for ($i = 1; $i < count($kept); $i++) {
+            $curr = strtotime($kept[$i]);
+            if ($curr - $prev > $stepSecs) {
+                $newBlocks[] = ['start' => $runStart, 'end' => date('H:i:s', $prev + $stepSecs)];
+                $runStart = $kept[$i];
+            }
+            $prev = $curr;
+        }
+        $newBlocks[] = ['start' => $runStart, 'end' => date('H:i:s', $prev + $stepSecs)];
+    }
+
+    $del = $pdo->prepare('DELETE FROM availability_blocks WHERE block_ID = :bid');
+    $del->execute([':bid' => $blockID]);
+
+    $ins = $pdo->prepare(
+        'INSERT INTO availability_blocks
+            (TutorID, date, start_time, end_time, slot_minutes, ClassID)
+         VALUES (:tid, :date, :start, :end, :mins, :classID)'
+    );
+    foreach ($newBlocks as $nb) {
+        $ins->execute([
+            ':tid'     => $tutorID,
+            ':date'    => $date,
+            ':start'   => $nb['start'],
+            ':end'     => $nb['end'],
+            ':mins'    => $slotMins,
+            ':classID' => $block['ClassID'],
+        ]);
+    }
+
+    $_SESSION['schedule_flash'] = 'Slot removed successfully.';
+    header('Location: scheduleSession.php');
+    exit;
 
     default:
         header('Location: scheduleSession.php');

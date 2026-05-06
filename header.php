@@ -2,7 +2,15 @@
 require 'DBConnect.php';
 
 if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params(0);
     session_start();
+}
+
+function navLink(string $dest, bool $public = false): string {
+    if ($public || !empty($_SESSION['loggedin'])) {
+        return $dest;
+    }
+    return 'login.php';
 }
 ?>
 <head>
@@ -131,10 +139,10 @@ body::before {
   <button class="w3-bar-item w3-button w3-large"
   onclick="w3_close()">Close &times;</button>
   <a href="sorry.php" class="w3-bar-item w3-button">Tutoring</a>
-  <a href="sorry.php" class="w3-bar-item w3-button">Question Board</a>
-  <a href="sorry.php" class="w3-bar-item w3-button">Class Tutoring Calendar</a>
+  <a href="<?php echo navLink('qaBoard.php', true); ?>" class="w3-bar-item w3-button">Question Board</a>
+  <a href="<?php echo navLink('scheduleSession.php', true); ?>" class="w3-bar-item w3-button">Class Tutoring Calendar</a>
   <a href="sorry.php" class="w3-bar-item w3-button">Miscellaneous</a>
-  <a href="dashboard.php" class="w3-bar-item w3-button">Dashboard</a>
+  <a href="<?php echo navLink('dashboard.php'); ?>" class="w3-bar-item w3-button">Dashboard</a>
   <?php if (isset($_SESSION['username']) && ($_SESSION['usertype']) == 1): ?>
     <div class="dropdown">
         <button class="drop-btn w3-button">Admin Tools <i class="fa fa-caret-down"></i></button>      

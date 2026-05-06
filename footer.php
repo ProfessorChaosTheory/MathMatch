@@ -1,7 +1,7 @@
 <div style="width:100%; background:#000; display:flex; padding: 1.5rem 2rem; box-sizing:border-box;">
   <div style="flex:1; padding: 0 1rem;">
     <p style="color:#fff; font-weight:bold;">Support</p>
-    <p style="color:#aaa;"><a href="mailto:admin@mathmatch.com"> E-Mail </a></p>
+    <p style="color:#aaa;"> E-Mail: admin@mathmatch.com </a></p>
     <p style="color:#aaa;">Chat</p>
     <p style="color:#aaa;">Hotline</p>
   </div>

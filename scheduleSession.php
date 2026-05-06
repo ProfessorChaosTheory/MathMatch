@@ -3,16 +3,14 @@
 //  scheduleSession.php
 //  Students (3) and tutors (2) browse available slots derived
 //  from availability_blocks and book individual slots.
+//  Admin (1) can remove slots, whether booked or not.
 // ============================================================
 session_start();
 
-if (empty($_SESSION['loggedin'])) {
-    header('Location: login.php');
-    exit;
-}
-
-$userID   = (int)$_SESSION['userID'];
-$usertype = (int)$_SESSION['usertype'];
+// Public page — guests can view but not book
+$loggedIn = !empty($_SESSION['loggedin']);
+$userID   = $loggedIn ? (int)$_SESSION['userID']  : 0;
+$usertype = $loggedIn ? (int)$_SESSION['usertype'] : 0;
 
 // ── DB connection ────────────────────────────────────────────
 $host   = 'localhost';
@@ -35,21 +33,38 @@ try {
     die('Database connection failed.');
 }
 
-// ── Load all upcoming availability blocks (excluding own) ────
-$blockStmt = $pdo->prepare(
-    'SELECT b.block_ID, b.date, b.start_time, b.end_time,
-            b.slot_minutes, b.ClassID,
-            c.class_name,
-            u.username AS tutor_name,
-            u.userID   AS tutor_id
-     FROM availability_blocks b
-     JOIN users u ON u.userID = b.TutorID
-     LEFT JOIN classes c ON c.classID = b.ClassID
-     WHERE b.TutorID != :uid
-       AND b.date >= :today
-     ORDER BY b.date ASC, b.start_time ASC'
-);
-$blockStmt->execute([':uid' => $userID, ':today' => date('Y-m-d')]);
+// ── Load all upcoming availability blocks ────────────────────
+// Guests see all blocks; logged-in users exclude their own
+if ($loggedIn && $usertype !== 1) {
+    $blockStmt = $pdo->prepare(
+        'SELECT b.block_ID, b.date, b.start_time, b.end_time,
+                b.slot_minutes, b.ClassID,
+                c.class_name,
+                u.username AS tutor_name,
+                u.userID   AS tutor_id
+         FROM availability_blocks b
+         JOIN users u ON u.userID = b.TutorID
+         LEFT JOIN classes c ON c.classID = b.ClassID
+         WHERE b.TutorID != :uid
+           AND b.date >= :today
+         ORDER BY b.date ASC, b.start_time ASC'
+    );
+    $blockStmt->execute([':uid' => $userID, ':today' => date('Y-m-d')]);
+} else {
+    $blockStmt = $pdo->prepare(
+        'SELECT b.block_ID, b.date, b.start_time, b.end_time,
+                b.slot_minutes, b.ClassID,
+                c.class_name,
+                u.username AS tutor_name,
+                u.userID   AS tutor_id
+         FROM availability_blocks b
+         JOIN users u ON u.userID = b.TutorID
+         LEFT JOIN classes c ON c.classID = b.ClassID
+         WHERE b.date >= :today
+         ORDER BY b.date ASC, b.start_time ASC'
+    );
+    $blockStmt->execute([':today' => date('Y-m-d')]);
+}
 $blocks = $blockStmt->fetchAll();
 
 // ── For each block, compute available (unbooked) slots ───────
@@ -135,7 +150,11 @@ unset($_SESSION['schedule_flash']);
 
     <div class="page-title">
         <h2>Schedule Tutoring</h2>
-        <p>Book an available slot from a tutor's offered times.</p>
+        <?php if ($loggedIn): ?>
+            <p>Book an available slot from a tutor's offered times.</p>
+        <?php else: ?>
+            <p>Browse available tutoring sessions. <a href="login.php" style="color:var(--accent-gold);">Sign in</a> to book one.</p>
+        <?php endif; ?>
     </div>
     <hr class="chalk">
 
@@ -166,7 +185,9 @@ unset($_SESSION['schedule_flash']);
                         <th>Duration</th>
                         <th>Tutor</th>
                         <th>Class</th>
-                        <?php if ($usertype === 2 || $usertype === 3): ?>
+                        <?php if ($loggedIn && ($usertype === 1 || $usertype === 2 || $usertype === 3)): ?>
+                        <th></th>
+                        <?php elseif (!$loggedIn): ?>
                         <th></th>
                         <?php endif; ?>
                     </tr>
@@ -181,20 +202,37 @@ unset($_SESSION['schedule_flash']);
                     <td><?php echo $slot['class_name']
                         ? htmlspecialchars($slot['class_name'])
                         : '<em class="text-muted">Unspecified</em>'; ?></td>
-                    <?php if ($usertype === 2 || $usertype === 3): ?>
+                    <?php if ($loggedIn && ($usertype === 2 || $usertype === 3)): ?>
                     <td>
                         <form action="scheduleSessionAction.php" method="POST"
                               onsubmit="return confirm('Book this slot?')"
                               class="d-inline">
-                            <input type="hidden" name="action"      value="book_session">
-                            <input type="hidden" name="block_id"    value="<?php echo (int)$slot['block_ID']; ?>">
-                            <input type="hidden" name="tutor_id"    value="<?php echo (int)$slot['tutor_id']; ?>">
-                            <input type="hidden" name="date"        value="<?php echo htmlspecialchars($slot['date']); ?>">
-                            <input type="hidden" name="time"        value="<?php echo htmlspecialchars($slot['time']); ?>">
+                            <input type="hidden" name="action"       value="book_session">
+                            <input type="hidden" name="block_id"     value="<?php echo (int)$slot['block_ID']; ?>">
+                            <input type="hidden" name="tutor_id"     value="<?php echo (int)$slot['tutor_id']; ?>">
+                            <input type="hidden" name="date"         value="<?php echo htmlspecialchars($slot['date']); ?>">
+                            <input type="hidden" name="time"         value="<?php echo htmlspecialchars($slot['time']); ?>">
                             <input type="hidden" name="slot_minutes" value="<?php echo (int)$slot['slot_minutes']; ?>">
-                            <input type="hidden" name="class_id"    value="<?php echo $slot['class_name'] ? '' : ''; ?>">
                             <button type="submit" class="btn btn-sm btn-primary">Book</button>
                         </form>
+                    </td>
+                    <?php elseif ($loggedIn && $usertype === 1): ?>
+                    <td>    
+                        <form action="scheduleSessionAction.php" method="POST" onsubmit="return confirm('Remove this session slot?')" class="d-inline">
+                        <input type="hidden" name="action"       value="remove_slot">
+                        <input type="hidden" name="block_id"     value="<?php echo (int)$slot['block_ID']; ?>">
+                        <input type="hidden" name="tutor_id"     value="<?php echo (int)$slot['tutor_id']; ?>">
+                        <input type="hidden" name="date"         value="<?php echo htmlspecialchars($slot['date']); ?>">
+                        <input type="hidden" name="time"         value="<?php echo htmlspecialchars($slot['time']); ?>">
+                        <input type="hidden" name="slot_minutes" value="<?php echo (int)$slot['slot_minutes']; ?>">
+                        <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                        </form>
+                    </td>
+                    <?php elseif (!$loggedIn): ?>
+                    <td>
+                        <a href="login.php" class="btn btn-sm btn-outline-secondary">
+                            Sign in to book
+                        </a>
                     </td>
                     <?php endif; ?>
                 </tr>
