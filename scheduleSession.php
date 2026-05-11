@@ -79,6 +79,7 @@ $takenStmt = $pdo->prepare(
 );
 
 $availableSlots = [];
+$takenSlots = [];
 foreach ($blocks as $b) {
     $takenStmt->execute([
         ':tid'   => $b['tutor_id'],
@@ -86,8 +87,22 @@ foreach ($blocks as $b) {
         ':start' => $b['start_time'],
         ':end'   => $b['end_time'],
     ]);
+
     $takenRows  = $takenStmt->fetchAll();
     $takenTimes = array_column($takenRows, 'time');
+
+    // Store booked slots
+    foreach ($takenTimes as $bookedTime) {
+        $takenSlots[] = [
+            'block_ID'     => $b['block_ID'],
+            'date'         => $b['date'],
+            'time'         => $bookedTime,
+            'slot_minutes' => $b['slot_minutes'],
+            'class_name'   => $b['class_name'],
+            'tutor_name'   => $b['tutor_name'],
+            'tutor_id'     => $b['tutor_id'],
+        ];
+    }
 
     $slotStart = strtotime($b['start_time']);
     $slotEnd   = strtotime($b['end_time']);
@@ -95,17 +110,17 @@ foreach ($blocks as $b) {
 
     for ($t = $slotStart; $t + $stepSecs <= $slotEnd; $t += $stepSecs) {
         $slotTime = date('H:i:s', $t);
-        // Skip already booked times
+
         if (in_array($slotTime, $takenTimes, true)) continue;
 
         $availableSlots[] = [
-            'block_ID'    => $b['block_ID'],
-            'date'        => $b['date'],
-            'time'        => $slotTime,
-            'slot_minutes'=> $b['slot_minutes'],
-            'class_name'  => $b['class_name'],
-            'tutor_name'  => $b['tutor_name'],
-            'tutor_id'    => $b['tutor_id'],
+            'block_ID'     => $b['block_ID'],
+            'date'         => $b['date'],
+            'time'         => $slotTime,
+            'slot_minutes' => $b['slot_minutes'],
+            'class_name'   => $b['class_name'],
+            'tutor_name'   => $b['tutor_name'],
+            'tutor_id'     => $b['tutor_id'],
         ];
     }
 }
@@ -185,6 +200,9 @@ unset($_SESSION['schedule_flash']);
                         <th>Duration</th>
                         <th>Tutor</th>
                         <th>Class</th>
+                        <?php if ($loggedIn && $usertype === 1): ?>
+                        <th></th>
+                        <?php endif; ?>
                         <?php if ($loggedIn && ($usertype === 1 || $usertype === 2 || $usertype === 3)): ?>
                         <th></th>
                         <?php elseif (!$loggedIn): ?>
@@ -242,6 +260,66 @@ unset($_SESSION['schedule_flash']);
         </div>
     <?php endif; ?>
 
+    <br>
+
+    <div class="card">
+        <div class="card-header bg-danger text-white">Taken / Booked Slots</div>
+
+        <?php if (empty($takenSlots)): ?>
+            <div class="card-body text-muted fst-italic">
+                No slots are currently booked.
+            </div>
+        <?php else: ?>
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Duration</th>
+                        <th>Tutor</th>
+                        <th>Class</th>
+                            <?php if ($loggedIn && $usertype === 1): ?>
+                            <th></th>
+                            <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($takenSlots as $slot): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($slot['date']); ?></td>
+                    <td><?php echo date('g:i A', strtotime($slot['time'])); ?></td>
+                    <td><?php echo (int)$slot['slot_minutes']; ?> min</td>
+                    <td><?php echo htmlspecialchars($slot['tutor_name']); ?></td>
+                    <td>
+                        <?php echo $slot['class_name']
+                            ? htmlspecialchars($slot['class_name'])
+                            : '<em class="text-muted">Unspecified</em>'; ?>
+                    </td>
+
+                    <?php if ($loggedIn && $usertype === 1): ?>
+                    <td>
+                        <form action="scheduleSessionAction.php" method="POST"
+                              onsubmit="return confirm('Cancel this booking?')"
+                              class="d-inline">
+
+                            <input type="hidden" name="action" value="cancel_booking">
+                            <input type="hidden" name="tutor_id" value="<?php echo (int)$slot['tutor_id']; ?>">
+                            <input type="hidden" name="date" value="<?php echo htmlspecialchars($slot['date']); ?>">
+                            <input type="hidden" name="time" value="<?php echo htmlspecialchars($slot['time']); ?>">
+
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                Cancel Booking
+                            </button>
+                        </form>
+                    </td>
+                    <?php endif; ?>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+    
 </div>
 </div>
 

@@ -140,7 +140,9 @@ body::before {
   onclick="w3_close()">Close &times;</button>
   <a href="sorry.php" class="w3-bar-item w3-button">Tutoring</a>
   <a href="<?php echo navLink('qaBoard.php', true); ?>" class="w3-bar-item w3-button">Question Board</a>
-  <a href="<?php echo navLink('scheduleSession.php', true); ?>" class="w3-bar-item w3-button">Class Tutoring Calendar</a>
+  <?php if (!isset($_SESSION['username']) || ($_SESSION['usertype']) != 1): ?>
+    <a href="<?php echo navLink('scheduleSession.php', true); ?>" class="w3-bar-item w3-button">Class Tutoring Calendar</a>
+  <?php endif; ?>
   <a href="sorry.php" class="w3-bar-item w3-button">Miscellaneous</a>
   <a href="<?php echo navLink('dashboard.php'); ?>" class="w3-bar-item w3-button">Dashboard</a>
   <?php if (isset($_SESSION['username']) && ($_SESSION['usertype']) == 1): ?>
@@ -149,6 +151,7 @@ body::before {
         <div class="dropdown-content">
             <a href="registerClass.php" class="w3-bar-item w3-button">Class Registration</a>
             <a href="userManager.php" class="w3-bar-item w3-button">User Management</a>
+            <a href="<?php echo navLink('scheduleSession.php', true); ?>" class="w3-bar-item w3-button">Tutoring Calendar Management</a>
         </div>
     </div>
   <?php endif; ?>
